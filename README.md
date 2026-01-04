@@ -66,3 +66,14 @@ pip install -r requirements.txt
 ```
 python -m uvicorn app.main:app --reload
 ```
+
+7. alembic 사용
+- 마이그레이션 파일 생성
+```
+alembic revision --autogenerate -m "message"
+```
+
+- DB에 적용
+```
+alembic upgrade head
+```
