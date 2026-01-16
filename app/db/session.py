@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from core.config import DATABASE_URL
+from app.core.config import DATABASE_URL
 
 # 260103 김광원
 # DB 세션관리
