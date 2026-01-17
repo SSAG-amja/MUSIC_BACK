@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
+from app.api.deps import get_db, get_current_user
 from app.crud import user as crud_user
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserBase, UserCreate, UserResponse
 
 router = APIRouter()
 
@@ -34,3 +34,12 @@ def signup(
     # 유저 생성 (CRUD 함수 호출 -> 내부에서 해싱됨)
     user = crud_user.create_user(db=db, user=user_in)
     return user
+
+@router.get("/me")
+def read_current_user(
+    current_user: UserBase = Depends(get_current_user)
+    ):
+    return{
+        "email": current_user.email,
+        "username": current_user.username,
+    }

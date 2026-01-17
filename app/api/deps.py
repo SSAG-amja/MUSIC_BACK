@@ -20,7 +20,7 @@ def get_db() -> Generator:
 # 260117 김광원
 # 토큰 검증 및 사용자 확인
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl="/api/endpoint/v1/login" 
+    tokenUrl="/api/v1/login" 
 )
 
 def get_current_user(
