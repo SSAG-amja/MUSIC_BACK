@@ -31,7 +31,6 @@ def signup(
             detail="이미 사용중인 username 입니다",
         )
     
-    
     # 유저 생성 (CRUD 함수 호출 -> 내부에서 해싱됨)
     user = crud_user.create_user(db=db, user=user_in)
     return user
