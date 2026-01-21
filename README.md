@@ -96,6 +96,9 @@ docker-compose exec -w /back/app/db web alembic revision --autogenerate -m "[mes
 # 2. DB에 변경 사항 적용
 docker-compose exec -w /back/app/db web alembic upgrade head
 
+# WINDOWS 해당 명령어 사용
+docker-compose exec -w //back/app/db web alembic upgrade head
+
 # 3. 위 명령어 안될시 (직접 접속)
 docker exec -it MUSIC_BACK /bin/bash 
 
@@ -107,7 +110,7 @@ alembic upgrade head
 ## 2. DB 접속(CLI)
 ```
 # docker exec -it [컨테이너이름] psql -U [유저명] -d [DB이름]
-docker exec -it music_db psql -U gookbob -d ssag_algo
+docker exec -it MUSIC_DB psql -U gookbob -d ssag_algo
 ```
 
 # 5. 라이브러리 추가 방법

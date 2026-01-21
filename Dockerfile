@@ -12,9 +12,7 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /back/requirements.txt
 
 # 5. 패키지 설치
-# (PostgreSQL 연동을 위해 필요한 시스템 패키지가 있을 수 있으나, 
-# psycopg2-binary를 쓰면 보통 그냥 설치됩니다)
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /back/requirements.txt
 
 # 6. 소스 코드 전체 복사
 COPY ./app /back/app
