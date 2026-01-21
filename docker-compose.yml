@@ -1,0 +1,36 @@
+# 260121 김광원
+# 컨테이너에 서비스 등록, 자동 이미지 빌드
+
+version: '3.9'
+
+services:
+  # 1. FastAPI 서비스
+  web:
+    build: .
+    container_name: MUSIC_BACK
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env 
+    environment:
+      - DB_HOST=db # database service name
+    depends_on:
+      - db
+
+  # 2. PostgreSQL 서비스
+  db:
+    image: postgres:15
+    container_name: MUSIC_DB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # DB 데이터를 도커 볼륨에 영구 저장
+    environment:
+      - POSTGRES_USER=${DB_USER}      # .env에서 읽어옴
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+
+# 데이터를 저장할 볼륨 정의
+volumes:
+  postgres_data:
