@@ -13,3 +13,4 @@ DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_POR
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 TOKEN_EXP_TIME = os.getenv("TOKEN_EXP_TIME")
+SERVER_PORT = os.getenv("SERVER_PORT")
