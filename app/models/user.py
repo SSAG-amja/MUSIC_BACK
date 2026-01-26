@@ -1,12 +1,15 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, Date
 from app.db.base import Base
 
-# 260103 김광원
-# User 모델 정의
+# 260116 김광원
+# users 테이블 정의
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False) # JWT 발급 시 검증할 비밀번호(해시됨)
-    is_active = Column(Boolean, default=True)
+    hashed_password = Column(String, nullable=False)
+    username = Column(String, index=True, nullable=False)
+    gender = Column(String, nullable=False)            
+    birth = Column(Date, nullable=False)            
+    is_active = Column(Boolean, default=True) # soft delete(현업에서 자주 사용)       

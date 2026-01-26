@@ -30,50 +30,91 @@
 └── README.md
 ```
 
-# 2. 실행방법
+# 2. 요구사항(Prerequisites)
+- Docker 환경에서 실행되도록 설계 Python, DB 설치 X
 
-1. 프로젝트 폴더로 이동
+## 1. 다운로드
+- [도커 다운로드](https://www.docker.com/products/docker-desktop/)
 
-2. 가상환경 생성 (최초 1번)
-```
-python -m venv venv
-```
+## 2. 환경변수설정(.env)
+- .env_example 참조하여 설정
 
-3. 가상환경 켜기
-- linux, Mac
-```
-source venv/bin/activate
-```
+# 3. 실행방법
 
-- windows
-```
-# git bash
-source venv/Scripts/activate
+## 1. 서버 실행(Build & RUN)
 
-# PowerShell / CMD
-.\venv\Scripts\activate
 ```
+# 이미지 빌드 및 실행(최초 실행시 라이브러리 추가 시 필수)
+docker-compose up --build
 
-4. 라이브러리 설치
-```
-pip install -r requirements.txt
+# 이미지 있으면 아래 명령어로 실행
+docker-compose up
+
+# 백그라운드 실행
+docker-compose up -d
 ```
 
-5. .env 파일 설정
-- 루트 디렉토리에 생성
+## 2. 실행 확인
+- Swagger UI (API 문서): http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-6. 실행
+## 3. 백그라운드 실행중 로그 확인
 ```
-python -m uvicorn app.main:app --reload
+# 전체 로그 보기
+docker-compose logs -f
+
+# 웹 혹은 DB 따로 확인 
+docker-compose logs -f web
+docker-compose logs -f db
+```
+- 종료시 : ctrl + c
+
+## 4. 서버 중단 및 종료
+```
+# 잠시 멈춤
+docker-compose stop
+
+# 실행중인 터미널에서 종료
+Ctrl + C
+
+# 백그라운드 컨테이너까지 완전히 내리기
+docker-compose down
+
+# 초기화 : 컨테이너, 네트워크 등 데이터 모두 지움
+docker-compose down -v
 ```
 
-7. alembic 사용
-- 마이그레이션 파일 생성
-```
-alembic revision --autogenerate -m "message"
-```
+# 4. 데이터베이스 관리(Migration)
+- 테이블 생성하거나 변경 사항 DB에 적용시 Docker Container 내부에서 alembic 실행해야함
 
-- DB에 적용
+## 1. 마이그레이션 적용(테이블 생성)
+- DB 처음 실행 됐거나 모델 변경시 실행
 ```
+# 1. 마이그레이션 파일 생성 (모델 변경 사항 감지)
+docker-compose exec -w /back/app/db web alembic revision --autogenerate -m "[message]"
+
+# 2. DB에 변경 사항 적용
+docker-compose exec -w /back/app/db web alembic upgrade head
+
+# WINDOWS 해당 명령어 사용
+docker-compose exec -w //back/app/db web alembic upgrade head
+
+# 3. 위 명령어 안될시 (직접 접속)
+docker exec -it MUSIC_BACK /bin/bash 
+
+cd app/db
+alembic revision --autogenerate -m "[message]"
 alembic upgrade head
 ```
+
+## 2. DB 접속(CLI)
+```
+# docker exec -it [컨테이너이름] psql -U [유저명] -d [DB이름]
+docker exec -it MUSIC_DB psql -U gookbob -d ssag_algo
+```
+
+# 5. 라이브러리 추가 방법
+- requirements.txt 패키지 추가시, 반드시 이미지 다시 빌드
+
+1. requirements.txt 수정
+2. docker-compose up --build
