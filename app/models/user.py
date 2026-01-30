@@ -12,4 +12,4 @@ class User(Base):
     username = Column(String, index=True, nullable=False)
     gender = Column(String, nullable=False)            
     birth = Column(Date, nullable=False)            
-    is_active = Column(Boolean, default=True) # soft delete(현업에서 자주 사용)       
+    is_active = Column(Boolean, default=True) # soft delete(현업에서 자주 사용)

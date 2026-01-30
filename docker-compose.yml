@@ -15,6 +15,9 @@ services:
       - .env 
     environment:
       - DB_HOST=db # database service name
+      # 260130 박현식
+      # window체체 core 경로 인식 보조
+      - PYTHONPATH=/back:/back/app
     depends_on:
       - db
 
