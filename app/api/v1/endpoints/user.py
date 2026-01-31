@@ -37,8 +37,21 @@ def signup(
     user = crud_user.create_user(db=db, user=user_in)
     return user
 
+@router.get("/me")
+def get_user_profile(
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    return {
+        "email" : current_user.email,
+        "username" : current_user.username,
+        "gender" : current_user.gender,
+        "birth" : current_user.birth,
+        "is_newer" : current_user.is_newer,
+    }
+
 @router.put("/me")
-def update_user_me(
+def update_user_profile(
     user_update: UserUpdate,
     db: Session = Depends(get_db),
     current_user: models_user = Depends(get_current_user)
