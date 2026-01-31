@@ -25,4 +25,10 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True  # ORM 객체를 Pydantic 모델로 변환 허용 (구 orm_mode)
 
-        
+# 260131 김광원
+# user정보 변경 스키마
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    gender: Optional[str] = None
+    birth: Optional[date] = None
+    current_password: str

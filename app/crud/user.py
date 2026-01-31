@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import exists
 from app.models.user import User
+from app.models.user_data import UserPreferredArtist, UserPreferredGenre
 from app.schemas.user import UserCreate
 from app.core.security import get_password_hash
 
@@ -43,4 +45,19 @@ def check_newer(db: Session, email: str):
     return False
 
 # 260131 김광원
-#def update_is_newer(db: Session, email: str):
+# user data table에 데이터 존재하는 경우 is_newer False로 
+def update_is_newer(db: Session, email: str):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return False
+    
+    has_artist = db.query(exists().where(UserPreferredArtist.user_id == user.id)).scalar()
+    has_genre = db.query(exists().where(UserPreferredGenre.user_id == user.id)).scalar()
+
+    if has_artist or has_genre:
+        user.is_newer = False
+        db.commit()
+        db.refresh(user)
+        return True
+    
+    return False
