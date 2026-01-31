@@ -19,6 +19,7 @@ class UserCreate(UserBase):
 # 클라이언트에게 응답할 데이터 (비밀번호 제외, ID 포함)
 class UserResponse(UserBase):
     id: int
+    is_newer: bool
     is_active: bool
 
     class Config:

@@ -24,10 +24,23 @@ def create_user(db: Session, user: UserCreate):
         hashed_password=hashed_password,
         gender=user.gender,
         birth=user.birth,
-        is_active=True
+        is_active=True,
+        is_newer=True
     )
     
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj) # DB에서 생성된 ID 등 데이터를 갱신
     return db_obj 
+
+# 260131 김광원
+# 신규 유저인지 확인
+def check_newer(db: Session, email: str):
+    user = db.query(User).filter(User.email == email).first()
+
+    if user:
+        return user.is_newer
+    return False
+
+# 260131 김광원
+#def update_is_newer(db: Session, email: str):
