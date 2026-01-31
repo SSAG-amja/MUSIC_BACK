@@ -39,7 +39,6 @@ def signup(
 
 @router.get("/me")
 def get_user_profile(
-    db: Session = Depends(get_db),
     current_user: UserResponse = Depends(get_current_user)
 ):
     return {
