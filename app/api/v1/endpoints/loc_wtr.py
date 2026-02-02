@@ -1,21 +1,18 @@
 from fastapi import APIRouter, HTTPException
 import httpx
-from app.core import config  #config.py에서 API키 불러오기
+# [변경 1] config에서 필요한 키만 직접 Import
+from app.core.config import KAKAO_REST_API_KEY, OPENWEATHERMAP_API_KEY
 from app.schemas.loc_wtr import WeatherResponse 
 
 router = APIRouter()
 
-# 260202 김호영
-# 위치 및 날씨 조회 API 작성
+# 260203 김호영
+# 위치 및 날씨 조회 API 작성 (OpenWeatherMap 버전)
 @router.get("/getLocWtr", response_model=WeatherResponse)
 async def get_location_and_weather(lat: float, lon: float):
     
-    # config.py 변수 직접 사용
-    KAKAO_KEY = config.KAKAO_REST_API_KEY
-    GOOGLE_KEY = config.GOOGLE_MAPS_API_KEY
-
-    # 키가 없으면 에러 (서버 로그용)
-    if not KAKAO_KEY or not GOOGLE_KEY:
+    # [변경 2] config.변수명 접근이나 재할당 없이, import한 변수를 검증에 바로 사용
+    if not KAKAO_REST_API_KEY or not OPENWEATHERMAP_API_KEY:
         print("❌ [ERROR] API Key Missing in config.py")
         raise HTTPException(status_code=500, detail="Server Configuration Error")
 
@@ -24,11 +21,13 @@ async def get_location_and_weather(lat: float, lon: float):
             # -------------------------------------------------
             # [A] 카카오: 좌표 -> 주소
             # -------------------------------------------------
+            # [변경 3] Authorization 헤더에 직접 Import한 키 사용
             kakao_res = await client.get(
                 "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json",
-                headers={"Authorization": f"KakaoAK {KAKAO_KEY}"},
+                headers={"Authorization": f"KakaoAK {KAKAO_REST_API_KEY}"}, 
                 params={"x": lon, "y": lat} 
             )
+            kakao_res.raise_for_status()
             kakao_data = kakao_res.json()
             
             city, district, dong = "위치미상", "", ""
@@ -39,61 +38,60 @@ async def get_location_and_weather(lat: float, lon: float):
                 dong = addr['region_3depth_name']
 
             # -------------------------------------------------
-            # [B] 구글: 좌표 -> 날씨
+            # [B] OpenWeatherMap: 좌표 -> 날씨
             # -------------------------------------------------
-            google_res = await client.get(
-                "https://weather.googleapis.com/v1/currentConditions:lookup",
+            # [변경 4] appid 파라미터에 직접 Import한 키 사용
+            owm_res = await client.get(
+                "https://api.openweathermap.org/data/2.5/weather",
                 params={
-                    "key": GOOGLE_KEY,
-                    "location.latitude": lat,
-                    "location.longitude": lon,
-                    "unitsSystem": "METRIC",
-                    "languageCode": "ko"
+                    "lat": lat,
+                    "lon": lon,
+                    "appid": OPENWEATHERMAP_API_KEY, 
+                    "units": "metric",
+                    "lang": "kr"
                 }
             )
-            google_data = google_res.json()
+            owm_res.raise_for_status()
+            owm_data = owm_res.json()
 
-            print("================ 구글 날씨 원본 데이터 ================")
-            print(google_data) 
-            print("======================================================")
+            # 로그 확인 (필요시 주석 해제)
+            # print("================ OWM 날씨 원본 데이터 ================")
+            # print(owm_data) 
+            # print("======================================================")
 
-            temp = 0
-            weather_desc = "정보 없음"
-            weather_code = "clear"
+            # 1. 기본 데이터 추출
+            temp = owm_data["main"]["temp"]
+            weather_desc = owm_data["weather"][0]["description"]
+            weather_main = owm_data["weather"][0]["main"]
+            icon_code = owm_data["weather"][0]["icon"]
 
-            if "currentConditions" in google_data:
-                cond = google_data["currentConditions"]
-                temp = cond.get("temperature", {}).get("value", 0)
-                weather_desc = cond.get("conditionDescription", "")
-                weather_code = cond.get("weatherCondition", "clear")
-
-            # 상태 매핑 (음악 추천용)
+            # 2. 상태 매핑
             status = "Clear"
-            code_lower = weather_code.lower()
-            if any(x in code_lower for x in ["rain", "drizzle", "shower", "thunder"]):
+            
+            if weather_main in ["Thunderstorm", "Drizzle", "Rain"]:
                 status = "Rain"
-            elif any(x in code_lower for x in ["snow", "ice", "hail"]):
+            elif weather_main == "Snow":
                 status = "Snow"
-            elif any(x in code_lower for x in ["cloud", "overcast"]):
+            elif weather_main == "Clouds":
                 status = "Clouds"
-            elif any(x in code_lower for x in ["fog", "mist", "haze"]):
+            elif weather_main in ["Mist", "Smoke", "Haze", "Dust", "Fog", "Sand", "Ash", "Squall", "Tornado"]:
                 status = "Atmosphere"
+            else:
+                status = "Clear"
 
         except Exception as e:
             print(f"❌ API Error: {e}")
-            # 에러 발생 시 프론트가 멈추지 않게 기본값 반환
             return {
                 "location": {"city": "통신에러", "district": "", "dong": ""},
                 "weather": {"status": "Clear", "temp": 0, "description": "로드 실패", "icon": ""}
             }
 
-    # 스키마(WeatherResponse) 형태에 맞춰 반환
     return {
         "location": { "city": city, "district": district, "dong": dong },
         "weather": {
             "status": status,
             "temp": temp,
             "description": weather_desc,
-            "icon": ""
+            "icon": f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
         }
     }
