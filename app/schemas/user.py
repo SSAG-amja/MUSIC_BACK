@@ -19,9 +19,16 @@ class UserCreate(UserBase):
 # 클라이언트에게 응답할 데이터 (비밀번호 제외, ID 포함)
 class UserResponse(UserBase):
     id: int
+    is_newer: bool
     is_active: bool
 
     class Config:
         from_attributes = True  # ORM 객체를 Pydantic 모델로 변환 허용 (구 orm_mode)
 
-        
+# 260131 김광원
+# user정보 변경 스키마
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    gender: Optional[str] = None
+    birth: Optional[date] = None
+    current_password: str
