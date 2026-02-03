@@ -75,3 +75,17 @@ def update_user_profile(
     db.refresh(current_user)
     
     return {"message": "회원정보가 수정되었습니다.", "user": current_user.username}
+
+# 온보딩 완료 처리
+@router.post("/onboarding/complete")
+def complete_onboarding(
+    db: Session = Depends(get_db),
+    current_user: models_user = Depends(get_current_user)
+):
+    # 1. 유저의 신규 상태를 False로 변경
+    current_user.is_newer = False
+    
+    # 2. DB 저장
+    db.commit()
+    
+    return {"message": "Onboarding completed successfully"}
