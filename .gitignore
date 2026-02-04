@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 .vscode/
 .python-version
+.DS_Store
