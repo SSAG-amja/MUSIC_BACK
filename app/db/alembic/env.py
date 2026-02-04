@@ -12,6 +12,9 @@ from app.core.config import DATABASE_URL
 # 생성되기를 원하는 테이블 반드시 이곳에 import 해줘야함 env.py에서 읽을 수 있게끔 
 from app.models.user import User
 from app.models.user_data import UserPreferredArtist, UserPreferredGenre
+# 260203 김호영
+# music_info 테이블들 등록
+from app.models.music_info import Music, Playlist, PlaylistTrack, MusicDiary
 
 # 260104 김광원
 # ini파일 대신 설정 (ini 파일 읽고 없으면 해당 설정값 적용되게 설정)
