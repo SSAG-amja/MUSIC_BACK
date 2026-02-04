@@ -39,3 +39,16 @@ class GenreResponse(GenreBase):
 
     class Config:
         from_attributes = True
+
+# 260204 김광원
+# newer 선호 장르 한번에 받기
+class NewerPreferencesCreate(BaseModel):
+    artist: ArtistCreate
+    genre: GenreCreate
+
+class NewerPreferencesResponse(BaseModel):
+    artist: ArtistResponse
+    genre: GenreResponse
+
+    class Config:
+        from_attributes = True

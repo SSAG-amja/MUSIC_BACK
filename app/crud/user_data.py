@@ -12,7 +12,7 @@ def create_artist_preference(db: Session, artist: ArtistCreate, user_id: int):
     )
     
     db.add(db_obj)
-    db.commit()
+    db.commit()          # 260204 김광원 [수정] : batch router 사용시 
     db.refresh(db_obj)  # DB에서 생성된 ID 등 데이터를 갱신
     return db_obj
 
