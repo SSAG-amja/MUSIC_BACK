@@ -1,8 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import exists
 from app.models.user import User
+from app.models.user_data import UserPreferredArtist, UserPreferredGenre
+from app.schemas.user import UserCreate, UserUpdate
 from app.schemas.user import UserCreate
 from app.core.security import get_password_hash
+from app.core.security import verify_password
 
 # 260116 김광원
 # 이메일 중복 체크
@@ -33,6 +36,26 @@ def create_user(db: Session, user: UserCreate):
     db.commit()
     db.refresh(db_obj) # DB에서 생성된 ID 등 데이터를 갱신
     return db_obj 
+
+# 260204 김광원
+# profile update
+def update_user(db: Session, user: User, user_in: UserUpdate) -> User | None:
+    if not verify_password(user_in.current_password, user.hashed_password):
+        return None
+    
+    update_data = user_in.model_dump(exclude_unset=True)
+
+    if "current_password" in update_data:
+        del update_data["current_password"]
+    
+    for field, value in update_data.items():
+        setattr(user, field, value)
+    
+    db.add(user)
+    db.commit()
+    db.refresh
+
+    return user
 
 # 260131 김광원
 # 신규 유저인지 확인
